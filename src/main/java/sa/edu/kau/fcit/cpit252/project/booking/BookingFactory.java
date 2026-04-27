@@ -1,4 +1,4 @@
-package booking;
+package sa.edu.kau.fcit.cpit252.project.booking;
 
 public class BookingFactory {
     public static Booking getBooking(String type) {

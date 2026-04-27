@@ -1,10 +1,15 @@
 package sa.edu.kau.fcit.cpit252.project;
 
-/**
- * Hello world!
- */
+import sa.edu.kau.fcit.cpit252.project.booking.*;
+
 public class App {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+
+        Booking booking = BookingFactory.getBooking("venue");
+
+        booking = new VIPDecorator(booking);
+        booking = new CateringDecorator(booking);
+
+        System.out.println(booking.createBooking());
     }
 }
