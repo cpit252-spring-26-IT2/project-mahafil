@@ -12,20 +12,28 @@ of double bookings and lost customers
 
 
 ## Features
-- A
-- B
+### Account
+- Register an account
+- Login with email and password
 
+### Venue Management
+- Add a new venue
+- View list of venues
+- Update venue details
+- Delete a venue
 
-## Usage
+### Booking Management
+- View all bookings
+- Cancel a booking
+- Update a booking
+- View booking history
+- Validate a booking
 
-To build and run the app, use:
+### Design Patterns
+- Factory Pattern (Creational)
+- Decorator Pattern (Structural)
 
-```shell
-```
-
-## Screenshots
-
-
-## License
-
-Pick a project license
+## Team Members
+- Mohamad Alghamdi
+- Sultan Aljedani
+- Nayef Alhunaiti
