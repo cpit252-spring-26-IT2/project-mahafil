@@ -7,6 +7,6 @@ public class BookingFactory {
         } else if (type.equalsIgnoreCase("workspace")) {
             return new WorkspaceBooking();
         }
-        return null;
+        throw new IllegalArgumentException("Unknown booking type: " + type);
     }
 }
