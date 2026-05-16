@@ -34,7 +34,10 @@ public class DataStore {
     @SuppressWarnings("unchecked")
     private <T> List<T> readList(File f) {
         if (!f.exists()) return new ArrayList<>();
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f))) {
+        try (
+                FileInputStream fileInputStream = new FileInputStream(f);
+                ObjectInputStream in = new ObjectInputStream(fileInputStream)
+        ) {
             Object o = in.readObject();
             return (List<T>) o;
         } catch (Exception e) {

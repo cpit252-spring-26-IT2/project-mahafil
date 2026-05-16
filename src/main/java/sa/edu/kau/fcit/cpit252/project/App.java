@@ -9,6 +9,8 @@ import sa.edu.kau.fcit.cpit252.project.booking.*;
 import sa.edu.kau.fcit.cpit252.project.payment.CashPayment;
 import sa.edu.kau.fcit.cpit252.project.payment.CreditCardPayment;
 import sa.edu.kau.fcit.cpit252.project.payment.PaymentStrategy;
+import sa.edu.kau.fcit.cpit252.project.receipt.Receipt;
+import sa.edu.kau.fcit.cpit252.project.receipt.ReceiptService;
 
 import java.util.List;
 import java.util.Scanner;
@@ -20,6 +22,7 @@ public class App {
         UserService userService = new UserService(store);
         HistoryService historyService = new HistoryService(store);
         SmartBookingRecommendationService recommendationService = new SmartBookingRecommendationService();
+        ReceiptService receiptService = new ReceiptService();
 
         User current = null;
 
@@ -69,7 +72,7 @@ public class App {
                 }
                 String choice = sc.nextLine().trim();
                 if (choice.equals("1")) {
-                    createManualBooking(sc, historyService, current);
+                    createManualBooking(sc, historyService, current, receiptService);
                 } else if (choice.equals("2")) {
                     System.out.print("Event type (Business Meeting / Workshop / Wedding / Celebration): ");
                     String eventType = sc.nextLine().trim();
@@ -86,13 +89,10 @@ public class App {
                         System.out.print("Do you like this recommendation? (y/n): ");
                         String accepted = sc.nextLine().trim();
                         if (accepted.equalsIgnoreCase("y")) {
-                            createSmartRecommendationBooking(sc, historyService, current, recommendation);
-                            System.out.println("Bye.");
-                            sc.close();
-                            return;
+                            createSmartRecommendationBooking(sc, historyService, current, recommendation, receiptService);
                         } else {
                             System.out.println("Create the booking manually instead.");
-                            createManualBooking(sc, historyService, current);
+                            createManualBooking(sc, historyService, current, receiptService);
                         }
                     } catch (NumberFormatException ex) {
                         System.out.println("Guests must be a number.");
@@ -114,6 +114,15 @@ public class App {
     }
 
     private static void createManualBooking(Scanner sc, HistoryService historyService, User current) {
+        createManualBooking(sc, historyService, current, new ReceiptService());
+    }
+
+    private static void createManualBooking(
+            Scanner sc,
+            HistoryService historyService,
+            User current,
+            ReceiptService receiptService
+    ) {
         System.out.print("Type (venue/workspace): ");
         String type = sc.nextLine().trim();
         Booking booking;
@@ -142,6 +151,7 @@ public class App {
         String details = formatBookingDetails(booking, guestCount);
         System.out.println("Booking created: " + details);
         processPayment(sc, booking.getTotalPrice());
+        receiptService.generateReceipt(new Receipt(current.getEmail(), details, booking.getTotalPrice()));
         historyService.addRecord(new BookingRecord(current.getEmail(), details));
     }
 
@@ -150,6 +160,16 @@ public class App {
             HistoryService historyService,
             User current,
             RecommendedBooking recommendation
+    ) {
+        createSmartRecommendationBooking(sc, historyService, current, recommendation, new ReceiptService());
+    }
+
+    private static void createSmartRecommendationBooking(
+            Scanner sc,
+            HistoryService historyService,
+            User current,
+            RecommendedBooking recommendation,
+            ReceiptService receiptService
     ) {
         System.out.println("Choose preferred add-on services for this recommendation.");
         Booking booking = askForManualServices(sc, recommendation.getBooking());
@@ -161,6 +181,7 @@ public class App {
         System.out.println("----------------------------------------");
         System.out.println("Booking created.");
         processPayment(sc, booking.getTotalPrice());
+        receiptService.generateReceipt(new Receipt(current.getEmail(), details, booking.getTotalPrice()));
         historyService.addRecord(new BookingRecord(current.getEmail(), details));
     }
 
