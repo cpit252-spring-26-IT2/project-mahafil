@@ -32,6 +32,7 @@ of double bookings and lost customers
 ### Design Patterns
 - Factory Pattern (Creational)
 - Decorator Pattern (Structural)
+- Strategy Pattern (Behavioral)
 
 ## Team Members
 - Mohamad Alghamdi

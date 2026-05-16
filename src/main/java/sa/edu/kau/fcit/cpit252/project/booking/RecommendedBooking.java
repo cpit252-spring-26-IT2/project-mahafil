@@ -4,11 +4,13 @@ public class RecommendedBooking {
     private final Booking booking;
     private final String bookingType;
     private final String reason;
+    private final int guestCount;
 
-    public RecommendedBooking(Booking booking, String bookingType, String reason) {
+    public RecommendedBooking(Booking booking, String bookingType, String reason, int guestCount) {
         this.booking = booking;
         this.bookingType = bookingType;
         this.reason = reason;
+        this.guestCount = guestCount;
     }
 
     public Booking getBooking() {
@@ -23,11 +25,19 @@ public class RecommendedBooking {
         return reason;
     }
 
+    public int getGuestCount() {
+        return guestCount;
+    }
+
+    public double getPricePerPerson() {
+        return booking.getTotalPrice() / guestCount;
+    }
+
     public String getSummary() {
         return String.format(
-                "%s \nRecommended type: %s  Total: %.2f SAR \nReason: %s",
-                booking.createBooking(),
+                "Recommended type: %s%nPrice per person: %.2f SAR%nTotal: %.2f SAR%nReason: %s",
                 bookingType,
+                getPricePerPerson(),
                 booking.getTotalPrice(),
                 reason
         );
