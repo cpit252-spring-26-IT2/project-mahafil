@@ -20,6 +20,8 @@ import sa.edu.kau.fcit.cpit252.project.booking.WorkspaceBooking;
 import sa.edu.kau.fcit.cpit252.project.payment.CashPayment;
 import sa.edu.kau.fcit.cpit252.project.payment.CreditCardPayment;
 import sa.edu.kau.fcit.cpit252.project.payment.PaymentStrategy;
+import sa.edu.kau.fcit.cpit252.project.venue.Venue;
+import sa.edu.kau.fcit.cpit252.project.venue.VenueService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,6 +62,7 @@ public class AppTest {
         assertEquals("user@example.com", record.getUserEmail());
         assertEquals("Venue booking", record.getDetails());
         assertNotNull(record.getTimestamp());
+        assertTrue(record.getReferenceNumber().matches("MAH-[A-F0-9]{8}"));
     }
 
     @Test
@@ -134,6 +137,38 @@ public class AppTest {
 
         HistoryService reloadedHistoryService = new HistoryService(store);
         assertEquals(1, reloadedHistoryService.getForUser("user@example.com").size());
+    }
+
+    @Test
+    public void historyServiceUpdatesAndCancelsBookingsByReference() {
+        HistoryService historyService = new HistoryService(new DataStore(tempDir.toString()));
+        BookingRecord record = new BookingRecord("user@example.com", "Original booking");
+        historyService.addRecord(record);
+
+        assertTrue(historyService.updateBooking("user@example.com", record.getReferenceNumber(), "Updated booking"));
+        assertEquals("Updated booking", historyService.findForUser("user@example.com", record.getReferenceNumber()).getDetails());
+        assertEquals("Updated", historyService.findForUser("user@example.com", record.getReferenceNumber()).getStatus());
+
+        assertTrue(historyService.cancelBooking("user@example.com", record.getReferenceNumber()));
+        assertTrue(historyService.findForUser("user@example.com", record.getReferenceNumber()).isCancelled());
+        assertFalse(historyService.updateBooking("user@example.com", record.getReferenceNumber(), "Cannot update"));
+    }
+
+    @Test
+    public void venueServiceAddsUpdatesDeletesAndPersistsVenues() {
+        DataStore store = new DataStore(tempDir.toString());
+        VenueService venueService = new VenueService(store);
+
+        Venue venue = venueService.addVenue("Test Hall", "Jeddah", "Venue", 100, 2500.0);
+
+        assertNotNull(venue.getId());
+        assertTrue(venueService.updateVenue(venue.getId(), "Updated Hall", "Riyadh", "Workspace", 25, 900.0));
+        assertEquals("Updated Hall", venueService.findById(venue.getId()).getName());
+        assertTrue(venueService.deleteVenue(venue.getId()));
+        assertNull(venueService.findById(venue.getId()));
+
+        VenueService reloaded = new VenueService(store);
+        assertNull(reloaded.findById(venue.getId()));
     }
 
     @Test

@@ -12,11 +12,17 @@ import sa.edu.kau.fcit.cpit252.project.payment.PaymentStrategy;
 import sa.edu.kau.fcit.cpit252.project.receipt.Receipt;
 import sa.edu.kau.fcit.cpit252.project.receipt.ReceiptService;
 
+import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
+        if (args.length == 0 || !args[0].equalsIgnoreCase("--console")) {
+            SwingUtilities.invokeLater(() -> new MahafilGui().setVisible(true));
+            return;
+        }
+
         Scanner sc = new Scanner(System.in);
         DataStore store = new DataStore("data");
         UserService userService = new UserService(store);
@@ -103,7 +109,8 @@ public class App {
                     List<BookingRecord> records = historyService.getForUser(current.getEmail());
                     if (records.isEmpty()) System.out.println("No bookings yet.");
                     for (BookingRecord r : records) {
-                        System.out.println(r.getTimestamp() + " - " + r.getDetails());
+                        System.out.println(r.getTimestamp() + " - " + r.getReferenceNumber()
+                                + " - " + r.getStatus() + " - " + r.getDetails());
                     }
                 } else if (choice.equals("4")) {
                     current = null;
@@ -151,8 +158,14 @@ public class App {
         String details = formatBookingDetails(booking, guestCount);
         System.out.println("Booking created: " + details);
         processPayment(sc, booking.getTotalPrice());
-        receiptService.generateReceipt(new Receipt(current.getEmail(), details, booking.getTotalPrice()));
-        historyService.addRecord(new BookingRecord(current.getEmail(), details));
+        BookingRecord record = new BookingRecord(current.getEmail(), details);
+        receiptService.generateReceipt(new Receipt(
+                current.getEmail(),
+                "Reference: " + record.getReferenceNumber() + System.lineSeparator() + details,
+                booking.getTotalPrice()
+        ));
+        historyService.addRecord(record);
+        System.out.println("Reference number: " + record.getReferenceNumber());
     }
 
     private static void createSmartRecommendationBooking(
@@ -181,8 +194,14 @@ public class App {
         System.out.println("----------------------------------------");
         System.out.println("Booking created.");
         processPayment(sc, booking.getTotalPrice());
-        receiptService.generateReceipt(new Receipt(current.getEmail(), details, booking.getTotalPrice()));
-        historyService.addRecord(new BookingRecord(current.getEmail(), details));
+        BookingRecord record = new BookingRecord(current.getEmail(), details);
+        receiptService.generateReceipt(new Receipt(
+                current.getEmail(),
+                "Reference: " + record.getReferenceNumber() + System.lineSeparator() + details,
+                booking.getTotalPrice()
+        ));
+        historyService.addRecord(record);
+        System.out.println("Reference number: " + record.getReferenceNumber());
     }
 
     private static void processPayment(Scanner sc, double amount) {
