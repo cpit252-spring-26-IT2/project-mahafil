@@ -23,20 +23,45 @@ public class VenueService {
     }
 
     public Venue addVenue(String name, String city, String type, int capacity, double price) {
+        return addVenue(name, city, type, capacity, price, false);
+    }
+
+    public Venue addVenue(String name, String city, String type, int capacity, double price, boolean kidsFriendly) {
         validate(name, city, type, capacity, price);
-        Venue venue = new Venue(name.trim(), city.trim(), type.trim(), capacity, price);
+        Venue venue = new Venue(name.trim(), city.trim(), type.trim(), capacity, price, kidsFriendly);
         venues.add(venue);
         save();
         return venue;
     }
 
     public boolean updateVenue(String id, String name, String city, String type, int capacity, double price) {
+        Venue venue = findById(id);
+        return updateVenue(
+                id,
+                name,
+                city,
+                type,
+                capacity,
+                price,
+                venue != null && venue.isKidsFriendly()
+        );
+    }
+
+    public boolean updateVenue(
+            String id,
+            String name,
+            String city,
+            String type,
+            int capacity,
+            double price,
+            boolean kidsFriendly
+    ) {
         validate(name, city, type, capacity, price);
         Venue venue = findById(id);
         if (venue == null) {
             return false;
         }
-        venue.update(name.trim(), city.trim(), type.trim(), capacity, price);
+        venue.update(name.trim(), city.trim(), type.trim(), capacity, price, kidsFriendly);
         save();
         return true;
     }
@@ -77,11 +102,11 @@ public class VenueService {
     }
 
     private void seedDefaultVenues() {
-        venues.add(new Venue("Corniche Grand Hall", "Jeddah", "Venue", 450, 9500.0));
-        venues.add(new Venue("Riyadh Business Loft", "Riyadh", "Workspace", 40, 1800.0));
-        venues.add(new Venue("Makkah Pearl Ballroom", "Makkah", "Venue", 300, 7800.0));
-        venues.add(new Venue("Dammam Expo Suite", "Dammam", "Workspace", 70, 2600.0));
-        venues.add(new Venue("Madinah Garden Hall", "Madinah", "Venue", 220, 6200.0));
+        venues.add(new Venue("Corniche Grand Hall", "Jeddah", "Venue", 450, 9500.0, true));
+        venues.add(new Venue("Riyadh Business Loft", "Riyadh", "Workspace", 40, 1800.0, false));
+        venues.add(new Venue("Makkah Pearl Ballroom", "Makkah", "Venue", 300, 7800.0, true));
+        venues.add(new Venue("Dammam Expo Suite", "Dammam", "Workspace", 70, 2600.0, false));
+        venues.add(new Venue("Madinah Garden Hall", "Madinah", "Venue", 220, 6200.0, true));
     }
 
     private void save() {

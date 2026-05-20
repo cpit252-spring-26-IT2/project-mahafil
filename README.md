@@ -38,6 +38,7 @@ of double bookings and lost customers
 - Smart Booking Recommendation 
 - Nearby events and workshops
 - Service's company finder
+- Kids-friendly venue and booking option
 
 ## Application Modes (GUI & Console)
 

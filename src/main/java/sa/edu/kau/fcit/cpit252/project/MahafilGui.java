@@ -202,6 +202,7 @@ public class MahafilGui extends JFrame {
         JCheckBox vip = new JCheckBox("VIP Service");
         JCheckBox catering = new JCheckBox("Catering");
         JCheckBox equipment = new JCheckBox("Equipment");
+        JCheckBox bringingKids = new JCheckBox("Bringing kids");
         JComboBox<String> payment = new JComboBox<>(new String[]{"Cash", "Credit card"});
         CardFields cardFields = new CardFields();
 
@@ -210,6 +211,8 @@ public class MahafilGui extends JFrame {
         panel.add(twoColumn(labeledField("Type", bookingType), labeledField("Guests", guests)), c);
         c.gridy++;
         panel.add(labeledField("Choose venue or workspace", venueChoice), c);
+        c.gridy++;
+        panel.add(bringingKids, c);
         c.gridy++;
         panel.add(addOnPanel(vip, catering, equipment), c);
         c.gridy++;
@@ -223,9 +226,10 @@ public class MahafilGui extends JFrame {
         JButton create = primaryButton("Create Booking");
         panel.add(create, c);
 
-        Runnable update = () -> updateManualSummary(bookingType, venueChoice, guests, vip, catering, equipment);
+        Runnable update = () -> updateManualSummary(bookingType, venueChoice, guests, vip, catering, equipment, bringingKids);
         bookingType.addActionListener(e -> update.run());
         venueChoice.addActionListener(e -> update.run());
+        bringingKids.addActionListener(e -> update.run());
         vip.addActionListener(e -> update.run());
         catering.addActionListener(e -> update.run());
         equipment.addActionListener(e -> update.run());
@@ -234,7 +238,17 @@ public class MahafilGui extends JFrame {
         cardFields.panel.setVisible(false);
         update.run();
 
-        create.addActionListener(e -> createManualBooking(bookingType, venueChoice, guests, vip, catering, equipment, payment, cardFields));
+        create.addActionListener(e -> createManualBooking(
+                bookingType,
+                venueChoice,
+                guests,
+                vip,
+                catering,
+                equipment,
+                bringingKids,
+                payment,
+                cardFields
+        ));
         return wrapForScroll(panel);
     }
 
@@ -249,6 +263,7 @@ public class MahafilGui extends JFrame {
         JCheckBox vip = new JCheckBox("VIP Service");
         JCheckBox catering = new JCheckBox("Catering");
         JCheckBox equipment = new JCheckBox("Equipment");
+        JCheckBox bringingKids = new JCheckBox("Bringing kids");
         JComboBox<String> payment = new JComboBox<>(new String[]{"Cash", "Credit card"});
         CardFields cardFields = new CardFields();
         JButton recommend = secondaryButton("Get Recommendation");
@@ -260,6 +275,8 @@ public class MahafilGui extends JFrame {
         c.gridy++;
         panel.add(recommend, c);
         c.gridy++;
+        panel.add(bringingKids, c);
+        c.gridy++;
         panel.add(addOnPanel(vip, catering, equipment), c);
         c.gridy++;
         panel.add(labeledField("Payment method", payment), c);
@@ -270,7 +287,8 @@ public class MahafilGui extends JFrame {
         c.gridy++;
         panel.add(create, c);
 
-        Runnable update = () -> updateSmartSummary(vip, catering, equipment);
+        Runnable update = () -> updateSmartSummary(vip, catering, equipment, bringingKids);
+        bringingKids.addActionListener(e -> update.run());
         vip.addActionListener(e -> update.run());
         catering.addActionListener(e -> update.run());
         equipment.addActionListener(e -> update.run());
@@ -289,7 +307,7 @@ public class MahafilGui extends JFrame {
                 showError(ex.getMessage());
             }
         });
-        create.addActionListener(e -> createSmartBooking(vip, catering, equipment, payment, cardFields));
+        create.addActionListener(e -> createSmartBooking(vip, catering, equipment, bringingKids, payment, cardFields));
         smartSummary.setText("Choose an event type and get a recommendation.");
         return wrapForScroll(panel);
     }
@@ -307,6 +325,7 @@ public class MahafilGui extends JFrame {
         JComboBox<String> type = new JComboBox<>(new String[]{"Venue", "Workspace"});
         JTextField capacity = new JTextField();
         JTextField price = new JTextField();
+        JCheckBox kidsFriendly = new JCheckBox("Kids friendly");
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setOpaque(false);
@@ -320,6 +339,8 @@ public class MahafilGui extends JFrame {
         form.add(labeledField("Type", type), c);
         c.gridy++;
         form.add(twoColumn(labeledField("Capacity", capacity), labeledField("Price SAR", price)), c);
+        c.gridy++;
+        form.add(kidsFriendly, c);
         c.gridy++;
 
         JPanel actions = new JPanel(new GridBagLayout());
@@ -347,6 +368,7 @@ public class MahafilGui extends JFrame {
             type.setSelectedItem(selected.getType());
             capacity.setText(String.valueOf(selected.getCapacity()));
             price.setText(String.format("%.2f", selected.getPrice()));
+            kidsFriendly.setSelected(selected.isKidsFriendly());
         });
 
         add.addActionListener(e -> {
@@ -356,9 +378,10 @@ public class MahafilGui extends JFrame {
                         city.getText(),
                         String.valueOf(type.getSelectedItem()),
                         parsePositiveInt(capacity.getText(), "Capacity"),
-                        parsePositiveDouble(price.getText(), "Price")
+                        parsePositiveDouble(price.getText(), "Price"),
+                        kidsFriendly.isSelected()
                 );
-                clearVenueForm(name, city, capacity, price);
+                clearVenueForm(name, city, capacity, price, kidsFriendly);
                 refreshVenues();
             } catch (IllegalArgumentException ex) {
                 showError(ex.getMessage());
@@ -378,7 +401,8 @@ public class MahafilGui extends JFrame {
                         city.getText(),
                         String.valueOf(type.getSelectedItem()),
                         parsePositiveInt(capacity.getText(), "Capacity"),
-                        parsePositiveDouble(price.getText(), "Price")
+                        parsePositiveDouble(price.getText(), "Price"),
+                        kidsFriendly.isSelected()
                 );
                 refreshVenues();
             } catch (IllegalArgumentException ex) {
@@ -398,14 +422,14 @@ public class MahafilGui extends JFrame {
                     JOptionPane.YES_NO_OPTION);
             if (confirmed == JOptionPane.YES_OPTION) {
                 venueService.deleteVenue(selected.getId());
-                clearVenueForm(name, city, capacity, price);
+                clearVenueForm(name, city, capacity, price, kidsFriendly);
                 refreshVenues();
             }
         });
 
         clear.addActionListener(e -> {
             venueList.clearSelection();
-            clearVenueForm(name, city, capacity, price);
+            clearVenueForm(name, city, capacity, price, kidsFriendly);
         });
 
         panel.add(new JScrollPane(venueList), BorderLayout.CENTER);
@@ -609,10 +633,23 @@ public class MahafilGui extends JFrame {
     }
 
     private void clearVenueForm(JTextField name, JTextField city, JTextField capacity, JTextField price) {
+        clearVenueForm(name, city, capacity, price, null);
+    }
+
+    private void clearVenueForm(
+            JTextField name,
+            JTextField city,
+            JTextField capacity,
+            JTextField price,
+            JCheckBox kidsFriendly
+    ) {
         name.setText("");
         city.setText("");
         capacity.setText("");
         price.setText("");
+        if (kidsFriendly != null) {
+            kidsFriendly.setSelected(false);
+        }
     }
 
     private void refreshBookingManagement() {
@@ -682,16 +719,20 @@ public class MahafilGui extends JFrame {
             JCheckBox vip,
             JCheckBox catering,
             JCheckBox equipment,
+            JCheckBox bringingKids,
             JComboBox<String> payment,
             CardFields cardFields
     ) {
         try {
             int guestCount = parseGuests(guests.getText());
             Booking booking = buildBooking(String.valueOf(bookingType.getSelectedItem()), vip, catering, equipment);
+            Venue venue = (Venue) venueChoice.getSelectedItem();
+            boolean kidsComing = bringingKids.isSelected();
+            validateKidsForVenue(venue, kidsComing);
             PaymentStrategy paymentStrategy = buildPaymentStrategy(payment, cardFields);
             paymentStrategy.pay(booking.getTotalPrice());
 
-            String details = formatBookingDetails(booking, guestCount, (Venue) venueChoice.getSelectedItem());
+            String details = formatBookingDetails(booking, guestCount, venue, kidsComing);
             BookingRecord record = saveBooking(details, booking.getTotalPrice());
             JOptionPane.showMessageDialog(this, "Booking created.\nReference: "
                     + record.getReferenceNumber() + "\n\n" + details);
@@ -704,6 +745,7 @@ public class MahafilGui extends JFrame {
             JCheckBox vip,
             JCheckBox catering,
             JCheckBox equipment,
+            JCheckBox bringingKids,
             JComboBox<String> payment,
             CardFields cardFields
     ) {
@@ -717,7 +759,7 @@ public class MahafilGui extends JFrame {
             PaymentStrategy paymentStrategy = buildPaymentStrategy(payment, cardFields);
             paymentStrategy.pay(booking.getTotalPrice());
 
-            String details = formatSmartRecommendationDetails(booking, currentRecommendation);
+            String details = formatSmartRecommendationDetails(booking, currentRecommendation, bringingKids.isSelected());
             BookingRecord record = saveBooking(details, booking.getTotalPrice());
             JOptionPane.showMessageDialog(this, "Recommended booking created.\nReference: "
                     + record.getReferenceNumber() + "\n\n" + details);
@@ -902,25 +944,32 @@ public class MahafilGui extends JFrame {
             JTextField guests,
             JCheckBox vip,
             JCheckBox catering,
-            JCheckBox equipment
+            JCheckBox equipment,
+            JCheckBox bringingKids
     ) {
         try {
             int guestCount = parseGuests(guests.getText());
             Booking booking = buildBooking(String.valueOf(bookingType.getSelectedItem()), vip, catering, equipment);
-            manualSummary.setText(toHtml(formatBookingDetails(booking, guestCount, (Venue) venueChoice.getSelectedItem())));
+            Venue venue = (Venue) venueChoice.getSelectedItem();
+            validateKidsForVenue(venue, bringingKids.isSelected());
+            manualSummary.setText(toHtml(formatBookingDetails(booking, guestCount, venue, bringingKids.isSelected())));
         } catch (IllegalArgumentException ex) {
             manualSummary.setText(ex.getMessage());
         }
     }
 
-    private void updateSmartSummary(JCheckBox vip, JCheckBox catering, JCheckBox equipment) {
+    private void updateSmartSummary(JCheckBox vip, JCheckBox catering, JCheckBox equipment, JCheckBox bringingKids) {
         if (currentRecommendation == null || smartBaseBooking == null) {
             smartSummary.setText("Choose an event type and get a recommendation.");
             return;
         }
 
         Booking booking = applyAddOns(smartBaseBooking, vip, catering, equipment);
-        smartSummary.setText(toHtml(formatSmartRecommendationDetails(booking, currentRecommendation)));
+        smartSummary.setText(toHtml(formatSmartRecommendationDetails(
+                booking,
+                currentRecommendation,
+                bringingKids.isSelected()
+        )));
     }
 
     private Booking buildBooking(String type, JCheckBox vip, JCheckBox catering, JCheckBox equipment) {
@@ -1012,22 +1061,47 @@ public class MahafilGui extends JFrame {
     }
 
     private String formatBookingDetails(Booking booking, int guestCount, Venue venue) {
+        return formatBookingDetails(booking, guestCount, venue, false);
+    }
+
+    private String formatBookingDetails(Booking booking, int guestCount, Venue venue, boolean bringingKids) {
         String baseDetails = formatBookingDetails(booking, guestCount);
         if (venue == null) {
-            return baseDetails;
+            return baseDetails + System.lineSeparator() + formatKidsDetails(bringingKids);
         }
-        return baseDetails + System.lineSeparator() + "Selected place: " + venue.getSummary();
+        return baseDetails
+                + System.lineSeparator() + "Selected place: " + venue.getSummary()
+                + System.lineSeparator() + formatKidsDetails(bringingKids);
     }
 
     private String formatSmartRecommendationDetails(Booking booking, RecommendedBooking recommendation) {
+        return formatSmartRecommendationDetails(booking, recommendation, false);
+    }
+
+    private String formatSmartRecommendationDetails(
+            Booking booking,
+            RecommendedBooking recommendation,
+            boolean bringingKids
+    ) {
         return String.format(
-                "Booking: %s%nServices: %s%nPrice per person: %.2f SAR%nTotal: %.2f SAR%nReason: %s",
+                "Booking: %s%nServices: %s%nPrice per person: %.2f SAR%nTotal: %.2f SAR%n%s%nReason: %s",
                 recommendation.getBooking().createBooking(),
                 formatSelectedServices(booking, recommendation.getBooking()),
                 booking.getTotalPrice() / recommendation.getGuestCount(),
                 booking.getTotalPrice(),
+                formatKidsDetails(bringingKids),
                 recommendation.getReason().replace(" You can choose add-on services before payment.", "")
         );
+    }
+
+    private void validateKidsForVenue(Venue venue, boolean bringingKids) {
+        if (bringingKids && venue != null && !venue.isKidsFriendly()) {
+            throw new IllegalArgumentException("The selected place is not kids friendly. Choose another place.");
+        }
+    }
+
+    private String formatKidsDetails(boolean bringingKids) {
+        return "Bringing kids: " + (bringingKids ? "Yes" : "No");
     }
 
     private String formatSelectedServices(Booking booking, Booking baseBooking) {

@@ -201,8 +201,19 @@ public class App {
 
         String details = formatBookingDetails(booking, guestCount);
         Venue selectedVenue = chooseVenueForBooking(sc, venueService);
+        boolean bringingKids = false;
+        if (venueService != null) {
+            bringingKids = askBringingKids(sc);
+            if (bringingKids && selectedVenue != null && !selectedVenue.isKidsFriendly()) {
+                System.out.println("The selected place is not kids friendly. Please choose another place or update the venue.");
+                return;
+            }
+        }
         if (selectedVenue != null) {
             details += System.lineSeparator() + "Selected place: " + selectedVenue.getSummary();
+        }
+        if (venueService != null) {
+            details += System.lineSeparator() + formatKidsDetails(bringingKids);
         }
         System.out.println("Booking created: " + details);
         processPayment(sc, booking.getTotalPrice());
@@ -369,6 +380,16 @@ public class App {
 
         return booking;
     }
+
+    private static boolean askBringingKids(Scanner sc) {
+        System.out.print("Will you bring kids? (y/n): ");
+        return sc.nextLine().trim().equalsIgnoreCase("y");
+    }
+
+    private static String formatKidsDetails(boolean bringingKids) {
+        return "Bringing kids: " + (bringingKids ? "Yes" : "No");
+    }
+
     private static String formatBookingDetails(Booking booking) {
         return String.format("%s | Total: %.2f SAR", booking.createBooking(), booking.getTotalPrice());
     }
@@ -460,7 +481,8 @@ public class App {
                     readRequired(sc, "City: "),
                     readRequired(sc, "Type (Venue/Workspace): "),
                     readPositiveInt(sc, "Capacity: ", "Capacity"),
-                    readPositiveDouble(sc, "Price SAR: ", "Price")
+                    readPositiveDouble(sc, "Price SAR: ", "Price"),
+                    readYesNo(sc, "Kids friendly? (y/n): ")
             );
             System.out.println("Venue added: " + venue.getSummary());
         } catch (IllegalArgumentException ex) {
@@ -485,7 +507,8 @@ public class App {
                     readRequired(sc, "City: "),
                     readRequired(sc, "Type (Venue/Workspace): "),
                     readPositiveInt(sc, "Capacity: ", "Capacity"),
-                    readPositiveDouble(sc, "Price SAR: ", "Price")
+                    readPositiveDouble(sc, "Price SAR: ", "Price"),
+                    readYesNo(sc, "Kids friendly? (y/n): ")
             );
             System.out.println(updated ? "Venue updated." : "Venue could not be updated.");
         } catch (IllegalArgumentException ex) {
@@ -740,6 +763,18 @@ public class App {
             throw new IllegalArgumentException("This field is required.");
         }
         return value;
+    }
+
+    private static boolean readYesNo(Scanner sc, String prompt) {
+        System.out.print(prompt);
+        String value = sc.nextLine().trim();
+        if (value.equalsIgnoreCase("y")) {
+            return true;
+        }
+        if (value.equalsIgnoreCase("n")) {
+            return false;
+        }
+        throw new IllegalArgumentException("Enter y or n.");
     }
 
     private static List<CityEvent> createCityEvents() {

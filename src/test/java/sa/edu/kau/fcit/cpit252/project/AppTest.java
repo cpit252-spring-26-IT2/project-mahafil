@@ -172,6 +172,20 @@ public class AppTest {
     }
 
     @Test
+    public void venueServiceStoresKidsFriendlySetting() {
+        DataStore store = new DataStore(tempDir.toString());
+        VenueService venueService = new VenueService(store);
+
+        Venue venue = venueService.addVenue("Family Hall", "Jeddah", "Venue", 120, 3200.0, true);
+
+        assertTrue(venue.isKidsFriendly());
+        assertTrue(venue.getSummary().contains("Kids friendly: Yes"));
+        assertTrue(venueService.updateVenue(venue.getId(), "Quiet Loft", "Riyadh", "Workspace", 20, 900.0, false));
+        assertFalse(venueService.findById(venue.getId()).isKidsFriendly());
+        assertTrue(venueService.findById(venue.getId()).getSummary().contains("Kids friendly: No"));
+    }
+
+    @Test
     public void venueBookingHasExpectedDescriptionAndPrice() {
         Booking booking = new VenueBooking();
 
