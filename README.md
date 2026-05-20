@@ -34,7 +34,29 @@ of double bookings and lost customers
 - Decorator Pattern (Structural)
 - Strategy Pattern (Behavioral)
 
-## Team Members
+### Core Features
+- Smart Booking Recommendation 
+- Nearby events and workshops
+- Service's company finder
+
+## Application Modes (GUI & Console)
+
+The application supports two modes of execution:
+
+- **GUI Mode**: Runs with a graphical user interface for user-friendly interaction.
+- **Console Mode**: Runs in terminal/command-line.
+
+### Running with Docker
+
+When running inside Docker, the application automatically uses **Console Mode**, since GUI is not supported in container environments.
+
+To run using Docker:
+```bash
+ docker build -t mahafil .
+ docker run -it mahafil
+```
+
+### Team Members
 - Mohamad Alghamdi
 - Sultan Aljedani
 - Nayef Alhunaiti
