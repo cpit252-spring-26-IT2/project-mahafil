@@ -56,6 +56,50 @@ To run using Docker:
  docker build -t mahafil .
  docker run -it mahafil
 ```
+---
+
+## Screenshots
+
+### GUI Screens
+
+#### Login Page
+![Login Page](screenshots/1-login-page.png)
+
+#### Manual Booking Page
+![Manual Booking](screenshots/2-ManualBooking-page.png)
+
+#### Smart Recommendation
+![Smart Recommendation](screenshots/3-SmartRecommendation-page.png)
+
+#### Venue Management
+![Venue Management](screenshots/4-VenueManagement-page.png)
+
+#### Booking Management
+![Booking Management](screenshots/5-BookingManagement-page.png)
+
+#### Nearby Events
+![Nearby Events](screenshots/6-NearbyEvents-page.png)
+
+#### Services Page
+![Services](screenshots/7-Services-page.png)
+
+#### Booking History
+![History](screenshots/8-History-page.png)
+
+---
+
+## Generative AI Usage Disclosure
+
+This project was developed in accordance with the course policy on the use of generative AI tools.
+
+Generative AI tools (such as ChatGPT) were used only in acceptable ways, including:
+- Refining ideas and understanding concepts
+- Debugging and fixing issues in our own code
+- Refactoring and improving code structure
+- Assisting with unit tests based on our existing logic
+- Proofreading and improving documentation
+
+All outputs from AI tools were reviewed, validated, and modified by the team. The final submission reflects our own work and understanding.
 
 ### Team Members
 - Mohamad Alghamdi
